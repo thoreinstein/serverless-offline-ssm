@@ -1,6 +1,6 @@
 {
   "name": "serverless-offline-ssm",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Read SSM parameters from a .env file instead of AWS",
   "main": "dist/index.js",
   "repository": "https://github.com/janders223/serverless-offline-ssm",
@@ -22,7 +22,10 @@
     "lint:fix": "eslint src --fix",
     "test": "jest",
     "precommit": "lint-staged",
-    "prepublish": "rollup -c rollup.config.js"
+    "build": "rollup -c rollup.config.js"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -45,8 +48,5 @@
       "eslint --fix",
       "git add"
     ]
-  },
-  "dependencies": {
-    "bluebird": "^3.5.1"
   }
 }
