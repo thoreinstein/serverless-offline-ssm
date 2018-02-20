@@ -10,7 +10,9 @@
   "scripts": {
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "test": "jest"
+    "test": "jest",
+    "precommit": "lint-staged",
+    "prepublish": "rollup src/index.js --o dist/index.js --f cjs"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -21,8 +23,17 @@
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-prettier": "^2.6.0",
+    "husky": "^0.14.3",
     "jest": "^22.4.0",
+    "lint-staged": "^6.1.1",
     "prettier": "^1.10.2",
-    "regenerator-runtime": "^0.11.1"
+    "regenerator-runtime": "^0.11.1",
+    "rollup": "^0.56.2"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }
