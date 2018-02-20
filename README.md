@@ -5,7 +5,6 @@ This [Serverless](https://github.com/serverless/serverless) plugin allows you to
 ## Documentation
 
 - [Installation](#installation)
-- [Configuration](#configuration)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -27,18 +26,6 @@ Then inside of your project's `serverless.yml` file add the following to the plu
 plugins:
     - serverless-offline-ssm
     - serverless-offline
-```
-
-## Configuration
-
-By default `serverless-offline-ssm` will look for local variables to be defined in a file called `.env` that lives at the root of your project. The plugin uses a fairly limited regex to match the variable name from the ssm string in `serverless.yml` to the value defined in the `.env` file. By default the regex will match on *nix style environment variables; i.e. `ENV_VAR` or `VAR`. Therefore given the ssm string `${ssm:ENV_VAR}` in `serverless.yml` the plugin wil look for `ENV_VAR` to be defined in the `.env` file using the following standard format `ENV_VAR=value`.
-
-It is possible to override both the location and name of the `.env` file as well as the regex used to match ssm parameters using custom attributes in your `serverless.yml` file.
-
-```yaml
-custom:
-    ssm_regex: "[a-zA-Z0-9_-]"
-    env_file: "relative/path/to/file"
 ```
 
 ## Contributing
