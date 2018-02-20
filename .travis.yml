@@ -1,5 +1,16 @@
 language: node_js
-node_js: ["6", "8"]
+node_js:
+- '6'
+- '8'
 cache:
   yarn: true
-  directories: ["node_modules"]
+  directories:
+  - node_modules
+deploy:
+  provider: npm
+  email: jim@janders223.com
+  api_key:
+    secure: 0Zmdeg2QHeDBmggTS59ZEQiKqj2lh3i+TYN5G7g4PP58nKZ6y6sy/jk9hF03N/WpegXO4qawvUleekEph6EgwpOohB59gF+Sb4EaTmXuEC4hXryS5Nkwqc8zSXrtEeBURzK1JLdBPJxnreParZ/xz5FvuYWij3h2OGhrcsom9WrBApX2jDODpeQADUcDKlwp/pyyG+NVIib+NMO1mMZ9BjJYys7/RLSF5rm8md3Qrz9ZjEAQ/O+gSnVoCOo0rY3LyMZI/PJmwnQYzbJbuCus/yyG9HSnRQX21zihLiD1lTUFAaN0b6NLHbzv9OLrvJtxecqc4y5mL+A67TP5DgNWYw5WgFyI3f6Vzt9gaHpIZLDfhY6avnEmeLvGS53FT5Hg+JGXUyloVWUO/dgX7N+y2en7cT1ccF+u5dxTqdSYq29ozshSMTUzAVJ0qB4TdZoLCqE6m1GU78zH8IX5NKo/ztGSr08YTthQw0r7IfD9B5AbpEAYrAA5qCKihwaRbVByvEaKazBH27smNAxcNmv2XN2EbGz/Pg1HhDWLyxRpkcUnNUmAUzV4l/61UfhjE0h7+ROXpQ9wI3yMbCNAB9zSXdbB4DrBndEWNilreWdv4Fl5ySy0xrr6Yk78fZOotLu5Rqgmh1u8qxl5Ub5Mmy9TVNZDnoprhCtvEf5FD/UDnb8=
+  on:
+    tags: true
+    repo: janders223/serverless-offline-ssm
