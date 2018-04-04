@@ -1,6 +1,6 @@
 {
   "name": "serverless-offline-ssm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Read SSM parameters from a .env file instead of AWS",
   "main": "dist/index.js",
   "repository": "https://github.com/janders223/serverless-offline-ssm",
