@@ -22,7 +22,7 @@ const start = serverless => new bluebird.Promise(resolve => {
       if (checkParam(environment[key])) {
 
         lines.forEach(line => {
-          const [envKey, value] = line.split('=');
+          const [envKey, value] = line.split(/=(.*)/);
 
           if (envKey === key) {
             serverless.cli.log(`Setting Variable ${key} to ${value}`);
