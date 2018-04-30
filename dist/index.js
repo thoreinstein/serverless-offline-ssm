@@ -6,7 +6,7 @@ const bluebird = require('bluebird');
 const readEnvFile = (path = '.env') => fs.readFileSync(path, { encoding: 'utf-8' }).trim().split('\n')
 
 const checkParam = (envValue) => {
-  if (envValue === undefined || envValue.startsWith('${ssm:')) {
+  if (envValue === undefined || (typeof envValue === 'string' &&  envValue.startsWith('${ssm:'))) {
     return true;
   }
 

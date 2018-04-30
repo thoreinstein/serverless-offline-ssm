@@ -1,5 +1,5 @@
 export default (envValue) => {
-  if (envValue === undefined || envValue.startsWith('${ssm:')) {
+  if (envValue === undefined || (typeof envValue === 'string' &&  envValue.startsWith('${ssm:'))) {
     return true;
   }
 
