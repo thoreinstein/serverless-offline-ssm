@@ -18,7 +18,7 @@ const start = serverless => new bluebird.Promise(resolve => {
     const sv = serverless;
     const { environment } = serverless.service.provider;
 
-    Object.keys(environment).forEach(key => {
+    Object.keys(environment || {}).forEach(key => {
       if (checkParam(environment[key])) {
 
         lines.forEach(line => {
