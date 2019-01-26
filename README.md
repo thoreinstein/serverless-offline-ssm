@@ -23,6 +23,8 @@ yarn install -D serverless-offline serverless-offline-ssm
 
 Then inside of your project's `serverless.yml` file add the following to the plugins section. Note it is important that `serverless-offline-ssm` is loaded before `serverless-offline`. This is important to ensure that we are setting the variables properly for `serverless-offline` before it needs them.
 
+_NOTE:_ It is imperative that `serverless-offline-ssm` be the the first plugin listed in the plugins section of your `serverless.yml` file. Due to the load order of plugins, other plugins may interfere with the loading of your `.env` file.
+
 ```yaml
 plugins:
     - serverless-offline-ssm
