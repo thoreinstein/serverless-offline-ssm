@@ -1,34 +1,24 @@
-workflow "Test, Build and Deploy" {
+workflow "Build and publish on push" {
   on = "push"
-  resolves = ["Test", "Publish"]
+  resolves = ["Publish"]
 }
 
-action "Install Dependencies" {
-  uses = "actions/npm@de7a3705a9510ee12702e124482fad6af249991b"
-  args = "install"
-}
-
-action "Lint" {
-  uses = "actions/npm@de7a3705a9510ee12702e124482fad6af249991b"
-  needs = ["Install Dependencies"]
-  args = "lint"
-}
-
-action "Test" {
-  uses = "actions/npm@de7a3705a9510ee12702e124482fad6af249991b"
-  needs = ["Install Dependencies"]
-  args = "test"
+action "Install dependencies" {
+  uses = "docker://node"
+  runs = "yarn"
+  args = "install --frozen-lockfile"
 }
 
 action "Build" {
-  uses = "actions/npm@de7a3705a9510ee12702e124482fad6af249991b"
-  needs = ["Lint", "Test"]
+  needs = "Install dependencies"
+  uses = "docker://node"
+  runs = "yarn"
   args = "build"
 }
 
 action "Publish" {
-  uses = "actions/npm@de7a3705a9510ee12702e124482fad6af249991b"
-  needs = ["Build"]
+  needs = "Build"
+  uses = "actions/npm@master"
   args = "publish --access public"
   secrets = ["NPM_AUTH_TOKEN"]
 }
