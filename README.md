@@ -6,6 +6,7 @@ This [Serverless](https://github.com/serverless/serverless) plugin allows you to
 ## Documentation
 
 - [Installation](#installation)
+- [Configuration](#configuration)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -29,6 +30,16 @@ _NOTE:_ It is imperative that `serverless-offline-ssm` be the the first plugin l
 plugins:
     - serverless-offline-ssm
     - serverless-offline
+```
+
+## Configuration
+
+You `.env` file needs to contain only the variable name without the `ssm:` prefix and `~(true|false|split)` sulfix.
+
+If `serverless.yml` you've defined var as `${ssm:lambda.LAMBDA_NAME.DB_DSN~true}` so inside the `.env` you need to put:
+
+```
+lambda.LAMBDA_NAME.DB_DSN="VAR VALUE"
 ```
 
 ## Contributing
