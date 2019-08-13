@@ -23,7 +23,7 @@ class ServerlessOfflineSSM {
     this.serverless.variables.getValueFromSsm = function getValueFromSsm(
       variable: string,
     ): Promise<any> {
-      const param = variable.match(this.ssmRefSyntax)[1]
+      const param = variable.match(this.ssmRefSyntax)[0]
       const vars = getVarsFromEnv()
 
       return Promise.resolve(vars[param])
