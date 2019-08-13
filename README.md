@@ -34,9 +34,9 @@ plugins:
 
 ## Configuration
 
-You `.env` file needs to contain only the variable name without the `ssm:` prefix and `~(true|false|split)` sulfix.
+Your `.env` file needs to contain only variable names without the `ssm:` prefix and `~(true|false|split)` sulfix.
 
-If `serverless.yml` you've defined var as `${ssm:lambda.LAMBDA_NAME.DB_DSN~true}` so inside the `.env` you need to put:
+If you've defined `${ssm:lambda.LAMBDA_NAME.DB_DSN~true}` in `serverless.yml` file your `.env` need to be like the example bellow:
 
 ```
 lambda.LAMBDA_NAME.DB_DSN="VAR VALUE"
