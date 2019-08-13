@@ -18,7 +18,7 @@ npm install serverless-offline serverless-offline-ssm --save-dev
 
 #or
 
-yarn install -D serverless-offline serverless-offline-ssm
+yarn add -D serverless-offline serverless-offline-ssm
 ```
 
 Then inside of your project's `serverless.yml` file add the following to the plugins section. Note it is important that `serverless-offline-ssm` is loaded before `serverless-offline`. This is important to ensure that we are setting the variables properly for `serverless-offline` before it needs them.
