@@ -19,7 +19,7 @@
     "API Gateway"
   ],
   "scripts": {
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "build": "tsc"
   },
   "devDependencies": {
