@@ -1,7 +1,20 @@
 import { getVarsFromEnv } from './util'
 
+type ConfigVariable = {
+
+}
+
+type Config = {
+  [key: string]: string;
+}
+
 type Serverless = {
   variables: Variables
+  service: {
+    custom: {
+      'serverless-offline-ssm'?: Config
+    }
+  }
 }
 
 type Variables = {
@@ -20,14 +33,23 @@ class ServerlessOfflineSSM {
       /^(?:\${)?ssm:([a-zA-Z0-9_.\-/]+)[~]?(true|false|split)?/,
     )
 
+    const config = this.getConfigFromServerlessYml();
+
     this.serverless.variables.getValueFromSsm = function getValueFromSsm(
       variable: string,
     ): Promise<any> {
       const param = variable.match(this.ssmRefSyntax)[1]
-      const vars = getVarsFromEnv()
+
+      const vars = Object.keys(config).length === 0
+        ? getVarsFromEnv()
+        : config
 
       return Promise.resolve(vars[param])
     }
+  }
+
+  getConfigFromServerlessYml(): Config {
+    return (this.serverless.service.custom || {})['serverless-offline-ssm'] || {}
   }
 }
 
