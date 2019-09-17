@@ -34,12 +34,28 @@ plugins:
 
 ## Configuration
 
+You can choose to use a `.env` file or define your variables in
+`serverless.yml`. `serverless-offline-ssm` will always check if the
+section `custom.serverless-offline-ssm` have any values, if not it will
+fallback to `.env`
+
+### .env
+
 Your `.env` file needs to contain only variable names without the `ssm:` prefix and `~(true|false|split)` sulfix.
 
 If you've defined `${ssm:lambda.LAMBDA_NAME.DB_DSN~true}` in `serverless.yml` file your `.env` need to be like the example bellow:
 
 ```
 lambda.LAMBDA_NAME.DB_DSN="VAR VALUE"
+```
+
+### serverless.yml
+
+```yaml
+custom:
+  serverless-offline-ssm:
+    'lambda.LAMBDA_NAME.DB_DSN': 'sample-value-goes-here'
+    'another.sample.value': '99 red baloons'
 ```
 
 ## Contributing
