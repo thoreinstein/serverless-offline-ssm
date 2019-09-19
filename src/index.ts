@@ -14,6 +14,9 @@ type Serverless = {
     custom: {
       'serverless-offline-ssm'?: Config
     }
+  },
+  processedInput: {
+    commands: string[]
   }
 }
 
@@ -28,6 +31,12 @@ class ServerlessOfflineSSM {
 
   constructor(serverless: Serverless) {
     this.serverless = serverless
+
+    // only run offline plugin when offline command is passed in
+    if (this.serverless.processedInput.commands.indexOf('offline') < 0) {
+      return;
+    }
+
     this.variables = serverless.variables
     this.ssmRefSyntax = RegExp(
       /^(?:\${)?ssm:([a-zA-Z0-9_.\-/]+)[~]?(true|false|split)?/,
