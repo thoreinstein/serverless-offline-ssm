@@ -8,6 +8,9 @@ declare type Serverless = {
             'serverless-offline-ssm'?: Config;
         };
     };
+    processedInput: {
+        commands: string[];
+    };
 };
 declare type Variables = {
     getValueFromSsm: (variable: string) => any;

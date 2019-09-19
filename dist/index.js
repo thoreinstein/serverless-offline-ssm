@@ -3,6 +3,10 @@ const util_1 = require("./util");
 class ServerlessOfflineSSM {
     constructor(serverless) {
         this.serverless = serverless;
+        // only run offline plugin when offline command is passed in
+        if (this.serverless.processedInput.commands.indexOf('offline') < 0) {
+            return;
+        }
         this.variables = serverless.variables;
         this.ssmRefSyntax = RegExp(/^(?:\${)?ssm:([a-zA-Z0-9_.\-/]+)[~]?(true|false|split)?/);
         const config = this.getConfigFromServerlessYml();
