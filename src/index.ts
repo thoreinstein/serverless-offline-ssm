@@ -1,15 +1,12 @@
 import { getVarsFromEnv } from './util'
 
-type ConfigVariable = {
-
-}
-
 type Config = {
   [key: string]: string;
 }
 
 type Serverless = {
   variables: Variables
+  version: string
   service: {
     custom: {
       'serverless-offline-ssm'?: Config
@@ -20,8 +17,18 @@ type Serverless = {
   }
 }
 
+type VariableResolvers = {
+  regex: RegExp
+  resolver: (variable: string) => any
+  serviceName?: string
+  isDisabledAtPrepopulation?: boolean
+}
+
 type Variables = {
+  ssmRefSyntax: RegExp
   getValueFromSsm: (variable: string) => any
+  getValueFromSsmOffline: (variable: string) => any | undefined
+  variableResolvers: VariableResolvers[]
 }
 
 class ServerlessOfflineSSM {
