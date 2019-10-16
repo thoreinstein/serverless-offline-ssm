@@ -33,21 +33,19 @@ type Variables = {
 
 class ServerlessOfflineSSM {
   serverless: Serverless
-  variables: Variables
-  ssmRefSyntax: RegExp
 
   constructor(serverless: Serverless) {
     this.serverless = serverless
 
     // only run offline plugin when offline command is passed in
     if (this.serverless.processedInput.commands.indexOf('offline') < 0) {
-      return;
+      return
     }
 
-    this.variables = serverless.variables
-    this.ssmRefSyntax = RegExp(
-      /^(?:\${)?ssm:([a-zA-Z0-9_.\-/]+)[~]?(true|false|split)?/,
-    )
+    if (!this.checkCompatibility()) {
+      console.log('This version of the plugin only works with Serverless 1.52 upwards.')
+      return
+    }
 
     const serverlessVars = this.serverless.variables
     const customConfig = this.getConfigFromServerlessYml();
@@ -71,6 +69,21 @@ class ServerlessOfflineSSM {
 
   getConfigFromServerlessYml(): Config {
     return (this.serverless.service.custom || {})['serverless-offline-ssm'] || {}
+  }
+
+  /**
+   * This plugin is only compatible with serverless 1.52+
+   */
+  checkCompatibility(): boolean {
+    const semver: number[] = this.serverless.version
+      .split('.')
+      .map(i => Number(i))
+
+    if (semver[0] <= 1 && semver[1] < 52) {
+      return false
+    }
+
+    return true
   }
 }
 
