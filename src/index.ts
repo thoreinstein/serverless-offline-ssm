@@ -49,18 +49,23 @@ class ServerlessOfflineSSM {
       /^(?:\${)?ssm:([a-zA-Z0-9_.\-/]+)[~]?(true|false|split)?/,
     )
 
-    const config = this.getConfigFromServerlessYml();
+    const serverlessVars = this.serverless.variables
+    const customConfig = this.getConfigFromServerlessYml();
 
-    this.serverless.variables.getValueFromSsm = function getValueFromSsm(
-      variable: string,
-    ): Promise<any> {
-      const param = variable.match(this.ssmRefSyntax)[1]
-
-      const vars = Object.keys(config).length === 0
+    serverlessVars.getValueFromSsmOffline = (variable) => {
+      const param = variable.match(serverlessVars.ssmRefSyntax)[1];
+      const vars = Object.keys(customConfig).length === 0
         ? getVarsFromEnv()
-        : config
+        : customConfig
 
       return Promise.resolve(vars[param])
+    }
+
+    // override the ssm resolver function
+    for (const varResolver of serverlessVars.variableResolvers) {
+      if (varResolver.serviceName === 'SSM') {
+        varResolver.resolver = serverlessVars.getValueFromSsmOffline.bind(this)
+      }
     }
   }
 
