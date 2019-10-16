@@ -3,6 +3,11 @@
 
 This [Serverless](https://github.com/serverless/serverless) plugin allows you to develop offline while using AWS SSM parameters in your `serverless.yml` template. The plugin looks for environment variables which are fulfilled by SSM parameters at build time and substitutes them from a `.env` file when running locally with the [serverless-offline plugin](https://github.com/dherault/serverless-offline).
 
+## NOTE!!
+
+Version `4.X` only works `Serverless 1.52+`, if you'd like to use this
+plugin with `Serverless <= 1.51` use version `3.1.0`
+
 ## Documentation
 
 - [Installation](#installation)
