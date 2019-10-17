@@ -3,6 +3,7 @@ declare type Config = {
 };
 declare type Serverless = {
     variables: Variables;
+    version: string;
     service: {
         custom: {
             'serverless-offline-ssm'?: Config;
@@ -12,14 +13,25 @@ declare type Serverless = {
         commands: string[];
     };
 };
+declare type VariableResolvers = {
+    regex: RegExp;
+    resolver: (variable: string) => any;
+    serviceName?: string;
+    isDisabledAtPrepopulation?: boolean;
+};
 declare type Variables = {
+    ssmRefSyntax: RegExp;
     getValueFromSsm: (variable: string) => any;
+    getValueFromSsmOffline: (variable: string) => any | undefined;
+    variableResolvers: VariableResolvers[];
 };
 declare class ServerlessOfflineSSM {
     serverless: Serverless;
-    variables: Variables;
-    ssmRefSyntax: RegExp;
     constructor(serverless: Serverless);
     getConfigFromServerlessYml(): Config;
+    /**
+     * This plugin is only compatible with serverless 1.52+
+     */
+    checkCompatibility(): boolean;
 }
 export = ServerlessOfflineSSM;
