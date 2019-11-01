@@ -28,6 +28,7 @@ declare type Variables = {
 declare class ServerlessOfflineSSM {
     serverless: Serverless;
     constructor(serverless: Serverless);
+    shouldRunPlugin(): boolean;
     getConfigFromServerlessYml(): Config;
     /**
      * This plugin is only compatible with serverless 1.52+
