@@ -1,7 +1,7 @@
 import { getVarsFromEnv } from './util'
 
 type Config = {
-  [key: string]: string;
+  [key: string]: string
 }
 
 type Serverless = {
@@ -11,7 +11,7 @@ type Serverless = {
     custom: {
       'serverless-offline-ssm'?: Config
     }
-  },
+  }
   processedInput: {
     commands: string[]
   }
@@ -37,24 +37,25 @@ class ServerlessOfflineSSM {
   constructor(serverless: Serverless) {
     this.serverless = serverless
 
-    // only run offline plugin when offline command is passed in
-    if (this.serverless.processedInput.commands.indexOf('offline') < 0) {
+    if (!this.shouldRunPlugin()) {
+      console.log('The plugin "serverless-offline-ssm" only runs when offline.')
       return
     }
 
     if (!this.checkCompatibility()) {
-      console.log('This version of the plugin only works with Serverless 1.52 upwards.')
+      console.log(
+        'This version of the plugin only works with Serverless 1.52 upwards.',
+      )
       return
     }
 
     const serverlessVars = this.serverless.variables
-    const customConfig = this.getConfigFromServerlessYml();
+    const customConfig = this.getConfigFromServerlessYml()
 
-    serverlessVars.getValueFromSsmOffline = (variable) => {
-      const param = variable.match(serverlessVars.ssmRefSyntax)[1];
-      const vars = Object.keys(customConfig).length === 0
-        ? getVarsFromEnv()
-        : customConfig
+    serverlessVars.getValueFromSsmOffline = variable => {
+      const param = variable.match(serverlessVars.ssmRefSyntax)[1]
+      const vars =
+        Object.keys(customConfig).length === 0 ? getVarsFromEnv() : customConfig
 
       return Promise.resolve(vars[param])
     }
@@ -67,19 +68,28 @@ class ServerlessOfflineSSM {
     }
   }
 
+  shouldRunPlugin(): boolean {
+    const { commands } = this.serverless.processedInput
+    if (commands.indexOf('offline') !== -1) return true
+    if (commands[0] === 'invoke' && commands[1] === 'local') return true
+    return false
+  }
+
   getConfigFromServerlessYml(): Config {
-    return (this.serverless.service.custom || {})['serverless-offline-ssm'] || {}
+    return (
+      (this.serverless.service.custom || {})['serverless-offline-ssm'] || {}
+    )
   }
 
   /**
    * This plugin is only compatible with serverless 1.52+
    */
   checkCompatibility(): boolean {
-    const semver: number[] = this.serverless.version
+    const [major, minor]: number[] = this.serverless.version
       .split('.')
       .map(i => Number(i))
 
-    if (semver[0] <= 1 && semver[1] < 52) {
+    if (major <= 1 && minor < 52) {
       return false
     }
 
