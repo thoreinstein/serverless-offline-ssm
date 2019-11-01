@@ -2,8 +2,8 @@ const ServerlessOfflineSSM = require('../index')
 
 jest.mock('../util', () => ({
   getVarsFromEnv: jest.fn().mockReturnValue({
-    'test': 'some value',
-  })
+    test: 'some value',
+  }),
 }))
 
 describe('serverless-offline-ssm', () => {
@@ -11,22 +11,36 @@ describe('serverless-offline-ssm', () => {
     version: '1.52.0',
     processedInput: { commands: ['offline'] },
     service: {
-      custom: {}
+      custom: {},
     },
     variables: {
       ssmRefSyntax: RegExp(/(test)/),
-      variableResolvers: [{
-          serviceName: 'SSM'
-        }
-      ]
-    }
+      variableResolvers: [
+        {
+          serviceName: 'SSM',
+        },
+      ],
+    },
   })
 
   describe('offline', () => {
     test('should initialize when using serverless offline', () => {
       const instance = new ServerlessOfflineSSM(serverlessMock())
       expect(instance.serverless.variables.getValueFromSsmOffline).toBeDefined()
-      expect(instance.serverless.variables.variableResolvers[0].resolver).toBeDefined()
+      expect(
+        instance.serverless.variables.variableResolvers[0].resolver,
+      ).toBeDefined()
+    })
+
+    test('should initialize when using invoke local', () => {
+      const instance = new ServerlessOfflineSSM({
+        ...serverlessMock(),
+        processedInput: { commands: ['invoke', 'local'] },
+      })
+      expect(instance.serverless.variables.getValueFromSsmOffline).toBeDefined()
+      expect(
+        instance.serverless.variables.variableResolvers[0].resolver,
+      ).toBeDefined()
     })
 
     test('should skip initialization when not offline', () => {
@@ -34,8 +48,12 @@ describe('serverless-offline-ssm', () => {
         ...serverlessMock(),
         processedInput: { commands: ['deploy'] },
       })
-      expect(instance.serverless.variables.getValueFromSsmOffline).toBeUndefined()
-      expect(instance.serverless.variables.variableResolvers[0].resolver).toBeUndefined()
+      expect(
+        instance.serverless.variables.getValueFromSsmOffline,
+      ).toBeUndefined()
+      expect(
+        instance.serverless.variables.variableResolvers[0].resolver,
+      ).toBeUndefined()
     })
   })
 
@@ -43,7 +61,7 @@ describe('serverless-offline-ssm', () => {
     test('should return false if version is less than 1.52.0', () => {
       const instance = new ServerlessOfflineSSM({
         ...serverlessMock(),
-        version: '1.51.0'
+        version: '1.51.0',
       })
       expect(instance.checkCompatibility()).toBeFalsy()
     })
@@ -56,7 +74,7 @@ describe('serverless-offline-ssm', () => {
     test('should return true for version 2.0.0 or higher', () => {
       const instance = new ServerlessOfflineSSM({
         ...serverlessMock(),
-        version: '2.0.0'
+        version: '2.0.0',
       })
       expect(instance.checkCompatibility()).toBeTruthy()
     })
@@ -65,24 +83,28 @@ describe('serverless-offline-ssm', () => {
   describe('custom config variable loading', () => {
     test('should load ssm variables under the serverless-offline-ssm section', async () => {
       const mockServerlessInstance = {
-        ...serverlessMock()
+        ...serverlessMock(),
       }
 
       mockServerlessInstance.service.custom = {
         'serverless-offline-ssm': {
-          'test': 'some value',
-        }
+          test: 'some value',
+        },
       }
 
       const instance = new ServerlessOfflineSSM(mockServerlessInstance)
-      await expect(instance.serverless.variables.getValueFromSsmOffline('test')).resolves.toBe('some value')
+      await expect(
+        instance.serverless.variables.getValueFromSsmOffline('test'),
+      ).resolves.toBe('some value')
     })
   })
 
   describe('.env file variable loading', () => {
     test('should load ssm variables from .env file ', async () => {
       const instance = new ServerlessOfflineSSM(serverlessMock())
-      await expect(instance.serverless.variables.getValueFromSsmOffline('test')).resolves.toBe('some value')
+      await expect(
+        instance.serverless.variables.getValueFromSsmOffline('test'),
+      ).resolves.toBe('some value')
     })
   })
 })
