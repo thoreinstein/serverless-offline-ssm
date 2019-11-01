@@ -42,7 +42,7 @@ class ServerlessOfflineSSM {
       return
     }
 
-    if (!this.checkCompatibility()) {
+    if (!this.isCompatibile()) {
       console.log(
         'This version of the plugin only works with Serverless 1.52 upwards.',
       )
@@ -70,8 +70,15 @@ class ServerlessOfflineSSM {
 
   shouldRunPlugin(): boolean {
     const { commands } = this.serverless.processedInput
-    if (commands.indexOf('offline') !== -1) return true
-    if (commands[0] === 'invoke' && commands[1] === 'local') return true
+
+    if (commands.includes('offline')) {
+      return true
+    }
+
+    if (commands[0] === 'invoke' && commands[1] === 'local') {
+      return true
+    }
+
     return false
   }
 
@@ -84,7 +91,7 @@ class ServerlessOfflineSSM {
   /**
    * This plugin is only compatible with serverless 1.52+
    */
-  checkCompatibility(): boolean {
+  isCompatibile(): boolean {
     const [major, minor]: number[] = this.serverless.version
       .split('.')
       .map(i => Number(i))

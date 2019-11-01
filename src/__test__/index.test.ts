@@ -63,12 +63,12 @@ describe('serverless-offline-ssm', () => {
         ...serverlessMock(),
         version: '1.51.0',
       })
-      expect(instance.checkCompatibility()).toBeFalsy()
+      expect(instance.isCompatibile()).toBeFalsy()
     })
 
     test('should return true if version is 1.52.0 or higher', () => {
       const instance = new ServerlessOfflineSSM(serverlessMock())
-      expect(instance.checkCompatibility()).toBeTruthy()
+      expect(instance.isCompatibile()).toBeTruthy()
     })
 
     test('should return true for version 2.0.0 or higher', () => {
@@ -76,7 +76,7 @@ describe('serverless-offline-ssm', () => {
         ...serverlessMock(),
         version: '2.0.0',
       })
-      expect(instance.checkCompatibility()).toBeTruthy()
+      expect(instance.isCompatibile()).toBeTruthy()
     })
   })
 
