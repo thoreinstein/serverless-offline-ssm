@@ -33,6 +33,6 @@ declare class ServerlessOfflineSSM {
     /**
      * This plugin is only compatible with serverless 1.52+
      */
-    checkCompatibility(): boolean;
+    isCompatibile(): boolean;
 }
 export = ServerlessOfflineSSM;

@@ -7,7 +7,7 @@ class ServerlessOfflineSSM {
             console.log('The plugin "serverless-offline-ssm" only runs when offline.');
             return;
         }
-        if (!this.checkCompatibility()) {
+        if (!this.isCompatibile()) {
             console.log('This version of the plugin only works with Serverless 1.52 upwards.');
             return;
         }
@@ -27,10 +27,15 @@ class ServerlessOfflineSSM {
     }
     shouldRunPlugin() {
         const { commands } = this.serverless.processedInput;
-        if (commands.indexOf('offline') !== -1)
+        if (commands.includes('offline')) {
             return true;
-        if (commands[0] === 'invoke' && commands[1] === 'local')
+        }
+        if (commands[0] === 'invoke' && commands[1] === 'local') {
             return true;
+        }
+        if (commands[0] === 'print') {
+            return true;
+        }
         return false;
     }
     getConfigFromServerlessYml() {
@@ -39,7 +44,7 @@ class ServerlessOfflineSSM {
     /**
      * This plugin is only compatible with serverless 1.52+
      */
-    checkCompatibility() {
+    isCompatibile() {
         const [major, minor] = this.serverless.version
             .split('.')
             .map(i => Number(i));
