@@ -23,6 +23,8 @@ declare type Variables = {
     ssmRefSyntax: RegExp;
     getValueFromSsm: (variable: string) => any;
     getValueFromSsmOffline: (variable: string) => any | undefined;
+    cfRefSyntax: RegExp;
+    getValueFromCloudFormationOffline: (variable: string) => any | undefined;
     variableResolvers: VariableResolvers[];
 };
 declare class ServerlessOfflineSSM {

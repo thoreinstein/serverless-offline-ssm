@@ -28,6 +28,8 @@ type Variables = {
   ssmRefSyntax: RegExp
   getValueFromSsm: (variable: string) => any
   getValueFromSsmOffline: (variable: string) => any | undefined
+  cfRefSyntax: RegExp
+  getValueFromCloudFormationOffline: (variable: string) => any | undefined
   variableResolvers: VariableResolvers[]
 }
 
@@ -52,21 +54,26 @@ class ServerlessOfflineSSM {
     const serverlessVars = this.serverless.variables
     const customConfig = this.getConfigFromServerlessYml()
 
-    serverlessVars.getValueFromSsmOffline = variable => {
-      const param = variable.match(serverlessVars.ssmRefSyntax)[1]
-      const vars =
-        Object.keys(customConfig).length === 0 ? getVarsFromEnv() : customConfig
+    const createLocalParser = function(expr:RegExp) {
+      return function(variable:string) {
+        const param = variable.match(expr)[1]
+        const vars =
+            Object.keys(customConfig).length === 0 ? getVarsFromEnv() : customConfig
 
-      return Promise.resolve(vars[param])
+        return Promise.resolve(vars[param])
+      }
     }
+
+    serverlessVars.getValueFromSsmOffline = createLocalParser(serverlessVars.ssmRefSyntax);
+    serverlessVars.getValueFromCloudFormationOffline = createLocalParser(serverlessVars.cfRefSyntax);
 
     // override the ssm resolver function
     for (const varResolver of serverlessVars.variableResolvers) {
       if (varResolver.serviceName === 'SSM') {
         varResolver.resolver = serverlessVars.getValueFromSsmOffline.bind(this)
       }
-      if (varResolver.serviceName === "CF") {
-        varResolver.resolver = serverlessVars.getValueFromSsmOffline.bind(this)
+      if (varResolver.serviceName === "CloudFormation") {
+        varResolver.resolver = serverlessVars.getValueFromCloudFormationOffline.bind(this)
       }
     }
   }
