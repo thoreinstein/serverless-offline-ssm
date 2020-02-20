@@ -23,6 +23,9 @@ class ServerlessOfflineSSM {
             if (varResolver.serviceName === 'SSM') {
                 varResolver.resolver = serverlessVars.getValueFromSsmOffline.bind(this);
             }
+            if (varResolver.serviceName === "CF") {
+                varResolver.resolver = serverlessVars.getValueFromSsmOffline.bind(this);
+            }
         }
     }
     shouldRunPlugin() {

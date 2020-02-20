@@ -65,6 +65,9 @@ class ServerlessOfflineSSM {
       if (varResolver.serviceName === 'SSM') {
         varResolver.resolver = serverlessVars.getValueFromSsmOffline.bind(this)
       }
+      if (varResolver.serviceName === "CF") {
+        varResolver.resolver = serverlessVars.getValueFromSsmOffline.bind(this)
+      }
     }
   }
 
@@ -78,7 +81,7 @@ class ServerlessOfflineSSM {
     if (commands[0] === 'invoke' && commands[1] === 'local') {
       return true
     }
-    
+
     if (commands[0] === 'print') {
       return true
     }
