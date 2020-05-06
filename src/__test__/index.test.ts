@@ -1,110 +1,156 @@
-const ServerlessOfflineSSM = require('../index')
+import merge from 'lodash.merge'
+import ServerlessOfflineSSM from '../index'
+import { getValueFromEnv } from '../util'
 
-jest.mock('../util', () => ({
-  getVarsFromEnv: jest.fn().mockReturnValue({
-    test: 'some value',
-  }),
-}))
+jest.mock('../util')
 
 describe('serverless-offline-ssm', () => {
-  const serverlessMock = () => ({
-    version: '1.52.0',
-    processedInput: { commands: ['offline'] },
+  const resolver = jest.fn()
+  const stage = '__STAGE__'
+  const mockGetValueFromEnv = getValueFromEnv as jest.Mock
+
+  beforeEach(() => {
+    mockGetValueFromEnv.mockClear()
+  })
+
+  const serverlessMock = (options: any = {}) => merge({
+    cli: {
+      log: jest.fn(),
+    },
     service: {
-      custom: {},
+      custom: {
+        'serverless-offline-ssm': {
+          stages: [stage]
+        },
+      },
+      provider: {},
     },
     variables: {
-      ssmRefSyntax: RegExp(/(test)/),
       variableResolvers: [
         {
+          regex: RegExp(/(ssm):(.*)/),
           serviceName: 'SSM',
+          resolver,
         },
       ],
     },
+    version: '1.69.0',
+  }, options)
+
+  const serverlessOptionsMock = (options: any = {}) => merge({
+    stage,
+  }, options)
+
+  test('should initialize with a valid options stage', () => {
+    const serverless = serverlessMock()
+    const options = serverlessOptionsMock()
+    const instance = new ServerlessOfflineSSM(serverless, options)
+
+    // check the resolver has been overridden
+    expect(serverless.variables.variableResolvers[0].resolver).toEqual(instance.resolver)
   })
 
-  describe('offline', () => {
-    test('should initialize when using serverless offline', () => {
-      const instance = new ServerlessOfflineSSM(serverlessMock())
-      expect(instance.serverless.variables.getValueFromSsmOffline).toBeDefined()
-      expect(
-        instance.serverless.variables.variableResolvers[0].resolver,
-      ).toBeDefined()
-    })
-
-    test('should initialize when using invoke local', () => {
-      const instance = new ServerlessOfflineSSM({
-        ...serverlessMock(),
-        processedInput: { commands: ['invoke', 'local'] },
-      })
-      expect(instance.serverless.variables.getValueFromSsmOffline).toBeDefined()
-      expect(
-        instance.serverless.variables.variableResolvers[0].resolver,
-      ).toBeDefined()
-    })
-
-    test('should skip initialization when not offline', () => {
-      const instance = new ServerlessOfflineSSM({
-        ...serverlessMock(),
-        processedInput: { commands: ['deploy'] },
-      })
-      expect(
-        instance.serverless.variables.getValueFromSsmOffline,
-      ).toBeUndefined()
-      expect(
-        instance.serverless.variables.variableResolvers[0].resolver,
-      ).toBeUndefined()
-    })
-  })
-
-  describe('checkCompatibility', () => {
-    test('should return false if version is less than 1.52.0', () => {
-      const instance = new ServerlessOfflineSSM({
-        ...serverlessMock(),
-        version: '1.51.0',
-      })
-      expect(instance.isCompatibile()).toBeFalsy()
-    })
-
-    test('should return true if version is 1.52.0 or higher', () => {
-      const instance = new ServerlessOfflineSSM(serverlessMock())
-      expect(instance.isCompatibile()).toBeTruthy()
-    })
-
-    test('should return true for version 2.0.0 or higher', () => {
-      const instance = new ServerlessOfflineSSM({
-        ...serverlessMock(),
-        version: '2.0.0',
-      })
-      expect(instance.isCompatibile()).toBeTruthy()
-    })
-  })
-
-  describe('custom config variable loading', () => {
-    test('should load ssm variables under the serverless-offline-ssm section', async () => {
-      const mockServerlessInstance = {
-        ...serverlessMock(),
+  test('should initialize with a valid provider stage', () => {
+    const serverless = serverlessMock({
+      service: {
+        provider: {
+          stage,
+        }
       }
+    })
+    const options = serverlessOptionsMock({ stage: null })
+    const instance = new ServerlessOfflineSSM(serverless, options)
 
-      mockServerlessInstance.service.custom = {
-        'serverless-offline-ssm': {
-          test: 'some value',
+    // check the resolver has been overridden
+    expect(serverless.variables.variableResolvers[0].resolver).toEqual(instance.resolver)
+  })
+
+  test('should not initialize without a valid stage', () => {
+    const serverless = serverlessMock()
+    const options = serverlessOptionsMock({ stage: null })
+    const instance = new ServerlessOfflineSSM(serverless, options)
+
+    // check the resolver has "not" been overridden
+    expect(serverless.variables.variableResolvers[0].resolver).not.toEqual(instance.resolver)
+  })
+
+  test('throws an exception with an invalid serverless version', () => {
+    expect(() => new ServerlessOfflineSSM(
+      serverlessMock({ version: '0.99'}),
+      serverlessOptionsMock(),
+    )).toThrowError(
+      'serverless-offline-ssm plugin only works with Serverless 1.69 upwards.'
+    )
+
+    expect(() => new ServerlessOfflineSSM(
+      serverlessMock({ version: '1.68'}),
+      serverlessOptionsMock(),
+    )).toThrowError(
+      'serverless-offline-ssm plugin only works with Serverless 1.69 upwards.'
+    )
+  })
+
+  test('throws an exception when the configuration is invalid', () => {
+    expect(() => new ServerlessOfflineSSM(
+      serverlessMock({
+        service: {
+          custom: {
+            'serverless-offline-ssm': {
+              stages: null,
+            },
+          },
         },
-      }
-
-      const instance = new ServerlessOfflineSSM(mockServerlessInstance)
-      await expect(
-        instance.serverless.variables.getValueFromSsmOffline('test'),
-      ).resolves.toBe('some value')
-    })
+      }),
+      serverlessOptionsMock(),
+    )).toThrowError(
+      'serverless-offline-ssm missing configuration stages.'
+    )
   })
 
-  describe('.env file variable loading', () => {
-    test('should load ssm variables from .env file ', async () => {
-      const instance = new ServerlessOfflineSSM(serverlessMock())
-      await expect(
-        instance.serverless.variables.getValueFromSsmOffline('test'),
-      ).resolves.toBe('some value')
+  describe('resolver', () => {
+    const yaml = '__YAML_VALUE__'
+    const both = '__BOTH_YAML_VALUE__'
+    const env = '__ENV_VALUE__'
+
+    const instance = new ServerlessOfflineSSM(
+      serverlessMock({
+        service: {
+          custom: {
+            'serverless-offline-ssm': {
+              stages: [stage],
+              ssm: {
+                yaml,
+                both,
+              },
+            },
+          },
+        },
+      }),
+      serverlessOptionsMock(),
+    )
+
+    test('resolves with an undefined value with an invalid key', async () => {
+      await expect(instance.resolver('invalid')).resolves.toBeUndefined()
+    })
+
+    test('resolves with the value defined within the serverless config', async () => {
+      await expect(instance.resolver('ssm:yaml')).resolves.toEqual(yaml)
+    })
+
+    test('resolves with the value defined within the .env file', async () => {
+      mockGetValueFromEnv.mockResolvedValueOnce(env)
+
+      await expect(instance.resolver('ssm:env')).resolves.toEqual(env)
+
+      expect(mockGetValueFromEnv).toHaveBeenCalledWith('env')
+    })
+
+    test('resolves values from the serverless config in preference to the .env file', async () => {
+      mockGetValueFromEnv.mockResolvedValueOnce('__BOTH_ENV_VALUE__')
+
+      await expect(instance.resolver('ssm:both')).resolves.toEqual(both)
+
+      expect(mockGetValueFromEnv).not.toHaveBeenCalled()
     })
   })
 })

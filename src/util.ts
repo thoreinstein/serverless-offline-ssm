@@ -1,16 +1,29 @@
-import { readFileSync } from 'fs'
+import { readFile } from 'fs'
 
-type VariableObject = {
-  [key: string]: any
-}
+export const getValueFromEnv = (key: string): Promise<string> =>
+  new Promise((resolve, reject) => {
+    readFile(
+      '.env',
+      { encoding: 'utf-8' },
+      (err: NodeJS.ErrnoException | null, data: string) => {
+        if (err) {
+          reject(err)
+          return
+        }
 
-export function getVarsFromEnv(): VariableObject {
-  return readFileSync('.env', { encoding: 'utf-8' })
-    .trim()
-    .split('\n')
-    .reduce((acc: VariableObject, line: string) => {
-      const [key, value] = line.split(/=(.*)/)
-      acc[key] = value
-      return acc
-    }, {})
-}
+        const values = data
+          .trim()
+          .split('\n')
+          .map(line => line.split(/=(.*)/))
+          .reduce<Record<string, string>>(
+            (accumulation, [key, value]) => ({
+              ...accumulation,
+              [key]: value,
+            }),
+            {},
+          )
+
+        resolve(values[key])
+      }
+    )
+  })
