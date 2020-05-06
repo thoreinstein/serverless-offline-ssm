@@ -5,8 +5,8 @@ This [Serverless](https://github.com/serverless/serverless) plugin allows you to
 
 ## NOTE!!
 
-Version `4.X` only works `Serverless 1.52+`, if you'd like to use this
-plugin with `Serverless <= 1.51` use version `3.1.0`
+Version `5.X` only works `Serverless 1.69+`, if you'd like to use this
+plugin with `Serverless <= 1.59` use version `4.1.2`
 
 ## Documentation
 
@@ -39,10 +39,17 @@ plugins:
 
 ## Configuration
 
-You can choose to use a `.env` file or define your variables in
-`serverless.yml`. `serverless-offline-ssm` will always check if the
-section `custom.serverless-offline-ssm` have any values, if not it will
-fallback to `.env`
+You can choose to use a `.env` file and/or define your variables in
+`serverless.yml`. Variables within `serverless-offline-ssm` take precedence.
+`serverless-offline-ssm` will always check if the section `custom.serverless-offline-ssm`
+have any values, if not it will fallback to `.env`
+
+### Stages
+
+This plugin executes if the stage defined within the plugin options
+or provider sections of your `serverless.yaml` are includes within the
+`stages` property of the plugin configuration. If this condition has not been
+met the plugin has no effect.
 
 ### .env
 
@@ -57,10 +64,15 @@ lambda.LAMBDA_NAME.DB_DSN="VAR VALUE"
 ### serverless.yml
 
 ```yaml
+provider:
+  stage: offline
 custom:
   serverless-offline-ssm:
-    'lambda.LAMBDA_NAME.DB_DSN': 'sample-value-goes-here'
-    'another.sample.value': '99 red baloons'
+    stages:
+      - offline
+    ssm:
+      'lambda.LAMBDA_NAME.DB_DSN': 'sample-value-goes-here'
+      'another.sample.value': '99 red baloons'
 ```
 
 ## Contributing
