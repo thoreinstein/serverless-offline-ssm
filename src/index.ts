@@ -1,110 +1,101 @@
-import { getVarsFromEnv } from './util'
+import Serverless from 'serverless'
+import Plugin from 'serverless/classes/Plugin'
+import { getValueFromEnv } from './util'
 
-type Config = {
-  [key: string]: string
+type ServerlessOfflineSSMConfig = {
+  stages: string[]
+  ssm?: Record<string, string>
 }
 
-type Serverless = {
-  variables: Variables
-  version: string
-  service: {
-    custom: {
-      'serverless-offline-ssm'?: Config
-    }
-  }
-  processedInput: {
-    commands: string[]
-  }
-}
-
-type VariableResolvers = {
+type Resolver = {
   regex: RegExp
-  resolver: (variable: string) => any
-  serviceName?: string
+  resolver: (name: string) => Promise<string | void>
   isDisabledAtPrepopulation?: boolean
+  serviceName?: string
 }
 
-type Variables = {
-  ssmRefSyntax: RegExp
-  getValueFromSsm: (variable: string) => any
-  getValueFromSsmOffline: (variable: string) => any | undefined
-  variableResolvers: VariableResolvers[]
+type ServerlessOffline = Serverless & {
+  variables: {
+    variableResolvers: Resolver[]
+  }
 }
 
-class ServerlessOfflineSSM {
-  serverless: Serverless
+class ServerlessOfflineSSM implements Plugin {
+  private log: (message: string) => null
+  private config?: ServerlessOfflineSSMConfig
+  private provider: string
+  private ssmResolver: Resolver | null
 
-  constructor(serverless: Serverless) {
-    this.serverless = serverless
+  hooks: Plugin.Hooks;
+  commands?: Plugin.Commands;
 
-    if (!this.shouldRunPlugin()) {
-      console.log('The plugin "serverless-offline-ssm" only runs when offline.')
-      return
-    }
+  constructor(
+    private serverless: ServerlessOffline,
+    private options: Serverless.Options
+  ) {
+    this.log = serverless.cli.log.bind(serverless.cli)
+    this.config = serverless.service.custom?.['serverless-offline-ssm'] ?? {}
+    this.provider = 'aws'
 
-    if (!this.isCompatibile()) {
-      console.log(
-        'This version of the plugin only works with Serverless 1.52 upwards.',
-      )
-      return
-    }
+    // check for valid configuration
+    this.valid()
 
-    const serverlessVars = this.serverless.variables
-    const customConfig = this.getConfigFromServerlessYml()
+    // check whether this plugin should be executed
+    if (this.shouldExecute()) {
+      // check for compatibility
+      this.compatible()
 
-    serverlessVars.getValueFromSsmOffline = variable => {
-      const param = variable.match(serverlessVars.ssmRefSyntax)[1]
-      const vars =
-        Object.keys(customConfig).length === 0 ? getVarsFromEnv() : customConfig
+      this.ssmResolver = serverless.variables.variableResolvers
+        .find(({ serviceName }) => serviceName === 'SSM')
 
-      return Promise.resolve(vars[param])
-    }
-
-    // override the ssm resolver function
-    for (const varResolver of serverlessVars.variableResolvers) {
-      if (varResolver.serviceName === 'SSM') {
-        varResolver.resolver = serverlessVars.getValueFromSsmOffline.bind(this)
+      // override the resolver
+      if (this.ssmResolver) {
+        this.ssmResolver.resolver = this.resolver
       }
     }
   }
 
-  shouldRunPlugin(): boolean {
-    const { commands } = this.serverless.processedInput
+  public resolver = (name: string): Promise<string | void> => {
+    const [,, key] = name.match(this.ssmResolver.regex) || []
 
-    if (commands.includes('offline')) {
-      return true
+    if (!key) {
+      // Yields "A valid SSM parameter ... could not be found."
+      return Promise.resolve()
     }
 
-    if (commands[0] === 'invoke' && commands[1] === 'local') {
-      return true
-    }
-    
-    if (commands[0] === 'print') {
-      return true
-    }
-
-    return false
+    const value = this.config.ssm?.[key]
+    return value ? Promise.resolve(value) : getValueFromEnv(key)
   }
 
-  getConfigFromServerlessYml(): Config {
-    return (
-      (this.serverless.service.custom || {})['serverless-offline-ssm'] || {}
-    )
+  shouldExecute = (): boolean => {
+    return this.config.stages.includes(
+      this.options.stage || this.serverless.service.provider?.stage
+    ) ?? false
   }
 
   /**
-   * This plugin is only compatible with serverless 1.52+
+   * This plugin is only compatible with serverless 1.69+
    */
-  isCompatibile(): boolean {
-    const [major, minor]: number[] = this.serverless.version
-      .split('.')
-      .map(i => Number(i))
+  private compatible = () => {
+    const { version } = this.serverless
 
-    if (major <= 1 && minor < 52) {
-      return false
+    this.log(
+      `serverless-offline-ssm checking serverless version ${version}.`,
+    )
+
+    const [major, minor] = version.split('.').map(Number)
+
+    if (major < 1 || (major === 1 && minor < 69)) {
+      throw new Error(
+        'serverless-offline-ssm plugin only works with Serverless 1.69 upwards.',
+      )
     }
+  }
 
-    return true
+  private valid = () => {
+    if (!this.config.stages) {
+      throw new Error('serverless-offline-ssm missing configuration stages.',)
+    }
   }
 }
 

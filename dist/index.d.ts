@@ -1,38 +1,32 @@
-declare type Config = {
-    [key: string]: string;
-};
-declare type Serverless = {
-    variables: Variables;
-    version: string;
-    service: {
-        custom: {
-            'serverless-offline-ssm'?: Config;
-        };
-    };
-    processedInput: {
-        commands: string[];
-    };
-};
-declare type VariableResolvers = {
+import Serverless from 'serverless';
+import Plugin from 'serverless/classes/Plugin';
+declare type Resolver = {
     regex: RegExp;
-    resolver: (variable: string) => any;
-    serviceName?: string;
+    resolver: (name: string) => Promise<string | void>;
     isDisabledAtPrepopulation?: boolean;
+    serviceName?: string;
 };
-declare type Variables = {
-    ssmRefSyntax: RegExp;
-    getValueFromSsm: (variable: string) => any;
-    getValueFromSsmOffline: (variable: string) => any | undefined;
-    variableResolvers: VariableResolvers[];
+declare type ServerlessOffline = Serverless & {
+    variables: {
+        variableResolvers: Resolver[];
+    };
 };
-declare class ServerlessOfflineSSM {
-    serverless: Serverless;
-    constructor(serverless: Serverless);
-    shouldRunPlugin(): boolean;
-    getConfigFromServerlessYml(): Config;
+declare class ServerlessOfflineSSM implements Plugin {
+    private serverless;
+    private options;
+    private log;
+    private config?;
+    private provider;
+    private ssmResolver;
+    hooks: Plugin.Hooks;
+    commands?: Plugin.Commands;
+    constructor(serverless: ServerlessOffline, options: Serverless.Options);
+    resolver: (name: string) => Promise<string | void>;
+    shouldExecute: () => boolean;
     /**
-     * This plugin is only compatible with serverless 1.52+
+     * This plugin is only compatible with serverless 1.69+
      */
-    isCompatibile(): boolean;
+    private compatible;
+    private valid;
 }
 export = ServerlessOfflineSSM;

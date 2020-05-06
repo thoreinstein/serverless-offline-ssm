@@ -1,5 +1,1 @@
-declare type VariableObject = {
-    [key: string]: any;
-};
-export declare function getVarsFromEnv(): VariableObject;
-export {};
+export declare const getValueFromEnv: (key: string) => Promise<string>;

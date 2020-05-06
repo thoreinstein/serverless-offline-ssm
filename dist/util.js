@@ -1,15 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
-function getVarsFromEnv() {
-    return fs_1.readFileSync('.env', { encoding: 'utf-8' })
-        .trim()
-        .split('\n')
-        .reduce((acc, line) => {
-        const [key, value] = line.split(/=(.*)/);
-        acc[key] = value;
-        return acc;
-    }, {});
-}
-exports.getVarsFromEnv = getVarsFromEnv;
+exports.getValueFromEnv = (key) => new Promise((resolve, reject) => {
+    fs_1.readFile('.env', { encoding: 'utf-8' }, (err, data) => {
+        if (err) {
+            reject(err);
+            return;
+        }
+        const values = data
+            .trim()
+            .split('\n')
+            .map(line => line.split(/=(.*)/))
+            .reduce((accumulation, [key, value]) => (Object.assign(Object.assign({}, accumulation), { [key]: value })), {});
+        resolve(values[key]);
+    });
+});
 //# sourceMappingURL=util.js.map
