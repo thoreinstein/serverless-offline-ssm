@@ -2,6 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
 exports.getValueFromEnv = (key) => new Promise((resolve, reject) => {
+    if (!fs_1.existsSync('.env')) {
+        resolve();
+    }
     fs_1.readFile('.env', { encoding: 'utf-8' }, (err, data) => {
         if (err) {
             reject(err);

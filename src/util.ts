@@ -1,7 +1,12 @@
-import { readFile } from 'fs'
+import { readFile, existsSync } from 'fs'
 
 export const getValueFromEnv = (key: string): Promise<string> =>
   new Promise((resolve, reject) => {
+    if (!existsSync('.env')) {
+      resolve()
+      return
+    }
+
     readFile(
       '.env',
       { encoding: 'utf-8' },
