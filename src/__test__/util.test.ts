@@ -15,6 +15,9 @@ describe('util', () => {
   describe('getValueFromEnv', () => {
     const existingKey = '__KEY_2__'
     const missingKey = '__KEY_4__'
+    const slashKey = '/key'
+    const slashData = '/key=slash-value'
+    const slashValue = 'slash-value'
     const value = '__VALUE_2__'
     const data = `__KEY_1__=__VALUE_1__\n${existingKey}=${value}\n__KEY_3__=__VALUE_3__`
     const err = new Error('__FAILED__')
@@ -27,14 +30,32 @@ describe('util', () => {
       expect(readFile).toHaveBeenCalledWith(
         '.env',
         { encoding: 'utf-8' },
-        expect.any(Function)
+        expect.any(Function),
       )
 
       // trigger the callback manually
-      const [[,, callback ]] = readFile.mock.calls
+      const [[, , callback]] = readFile.mock.calls
       callback(null, data)
 
       return expect(resolved).resolves.toEqual(value)
+    })
+
+    it('resolves values with keys with leading slashes', () => {
+      existsSync.mockReturnValue(true)
+
+      const resolved = getValueFromEnv(slashKey)
+
+      expect(readFile).toHaveBeenCalledWith(
+        '.env',
+        { encoding: 'utf-8' },
+        expect.any(Function),
+      )
+
+      // trigger the callback manually
+      const [[, , callback]] = readFile.mock.calls
+      callback(null, slashData)
+
+      return expect(resolved).resolves.toEqual(slashValue)
     })
 
     it('resolves with undefined when the supplied key is not found', () => {
@@ -45,11 +66,11 @@ describe('util', () => {
       expect(readFile).toHaveBeenCalledWith(
         '.env',
         { encoding: 'utf-8' },
-        expect.any(Function)
+        expect.any(Function),
       )
 
       // trigger the callback manually
-      const [[,, callback ]] = readFile.mock.calls
+      const [[, , callback]] = readFile.mock.calls
       callback(null, data)
 
       return expect(resolved).resolves.toEqual(undefined)
@@ -71,7 +92,7 @@ describe('util', () => {
       const resolved = getValueFromEnv(existingKey)
 
       // trigger the callback manually
-      const [[,, callback ]] = readFile.mock.calls
+      const [[, , callback]] = readFile.mock.calls
       callback(err)
 
       await expect(resolved).rejects.toEqual(err)
