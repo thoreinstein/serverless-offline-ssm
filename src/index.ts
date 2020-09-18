@@ -64,7 +64,15 @@ class ServerlessOfflineSSM implements Plugin {
     }
 
     const value = this.config.ssm?.[key]
-    return value ? Promise.resolve(value) : getValueFromEnv(key)
+    const promisifiedValue = value
+      ? Promise.resolve(value)
+      : getValueFromEnv(key)
+    
+    if (key.startsWith('/aws/reference/secretsmanager')) {
+      return promisifiedValue.then(JSON.parse).catch(() => promisifiedValue)
+    } else {
+      return promisifiedValue
+    }
   }
 
   shouldExecute = (): boolean => {
