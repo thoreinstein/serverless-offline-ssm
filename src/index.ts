@@ -70,9 +70,9 @@ class ServerlessOfflineSSM implements Plugin {
     
     if (key.startsWith('/aws/reference/secretsmanager')) {
       return promisifiedValue.then(JSON.parse).catch(() => promisifiedValue)
-    } else {
-      return promisifiedValue
-    }
+    } 
+
+    return promisifiedValue
   }
 
   shouldExecute = (): boolean => {
