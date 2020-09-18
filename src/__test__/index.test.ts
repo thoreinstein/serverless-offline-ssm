@@ -153,4 +153,40 @@ describe('serverless-offline-ssm', () => {
       expect(mockGetValueFromEnv).not.toHaveBeenCalled()
     })
   })
+
+  describe('resolver with AWS Secrets Manager key', () => {
+    const yaml = '__YAML_VALUE__'
+
+    const instance = new ServerlessOfflineSSM(
+      serverlessMock({
+        service: {
+          custom: {
+            'serverless-offline-ssm': {
+              stages: [stage],
+              ssm: {
+                yaml,
+                '/aws/reference/secretsmanager/__PARSABLE_KEY__': '{ "__KEY__": "__VALUE__" }',
+                '/aws/reference/secretsmanager/__UNPARSABLE_KEY__': '__UNPARSABLE_VALUE__'
+              },
+            },
+          },
+        },
+      }),
+      serverlessOptionsMock(),
+    )
+
+    test('resolves with the value for regular key', async () => {
+      await expect(instance.resolver('ssm:yaml')).resolves.toEqual(yaml)
+    })
+
+    test('resolves with the value parsed as JSON for AWS Secret Manager keys', async () => {
+      await expect(instance.resolver('ssm:/aws/reference/secretsmanager/__PARSABLE_KEY__')).resolves.toEqual({ "__KEY__": "__VALUE__" })
+    })
+
+    test('resolves with the value unparsed if the value is unparsable for AWS Secret Manager keys', async () => {
+      await expect(instance.resolver('ssm:/aws/reference/secretsmanager/__UNPARSABLE_KEY__')).resolves.toEqual('__UNPARSABLE_VALUE__')
+    })
+
+  })
 })
+
