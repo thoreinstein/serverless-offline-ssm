@@ -13,7 +13,13 @@ class ServerlessOfflineSSM {
                 return Promise.resolve();
             }
             const value = (_a = this.config.ssm) === null || _a === void 0 ? void 0 : _a[key];
-            return value ? Promise.resolve(value) : util_1.getValueFromEnv(key);
+            const promisifiedValue = value
+                ? Promise.resolve(value)
+                : util_1.getValueFromEnv(key);
+            if (key.startsWith('/aws/reference/secretsmanager')) {
+                return promisifiedValue.then(JSON.parse).catch(() => promisifiedValue);
+            }
+            return promisifiedValue;
         };
         this.shouldExecute = () => {
             var _a, _b;

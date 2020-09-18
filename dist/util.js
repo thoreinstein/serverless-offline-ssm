@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getValueFromEnv = void 0;
 const fs_1 = require("fs");
 exports.getValueFromEnv = (key) => new Promise((resolve, reject) => {
     if (!fs_1.existsSync('.env')) {
