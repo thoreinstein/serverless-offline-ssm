@@ -556,9 +556,9 @@
   integrity sha512-5qOlnZscTn4xxM5MeGXAMOsIOIKIbh9e85zJWfBRVPlRMEVawzoPhINYbRGkBZCI8LxvBe7tJCdWiarA99OZfQ==
 
 "@types/serverless@^1.67.0":
-  version "1.72.5"
-  resolved "https://registry.yarnpkg.com/@types/serverless/-/serverless-1.72.5.tgz#79f70482bf20e0eb6d5f080185e9cf7484d6e5a0"
-  integrity sha512-yD9miAGJMCVOJiRq0no8wD69aRVGpaN3M4H5H7GijT7DJYh8BqTLfO708mZsp/OfZAGxZmykn1rwMCmN8dhjtg==
+  version "1.78.0"
+  resolved "https://registry.yarnpkg.com/@types/serverless/-/serverless-1.78.0.tgz#87b6b49d0569e30b4c11848d18647656587d8221"
+  integrity sha512-PLe48DDGTwmiPfY1QeNOv741uWxHpqDU0oijt3skF9OblJoMbjyhzO7zWoT2F+5hlg4VSbYSEZYDyxo7OMtOLA==
 
 "@types/stack-utils@^1.0.1":
   version "1.0.1"
