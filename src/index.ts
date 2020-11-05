@@ -20,6 +20,10 @@ type ServerlessOffline = Serverless & {
   }
 }
 
+type PluginOptions = Serverless.Options & {
+  ssmOfflineStages?: string
+}
+
 class ServerlessOfflineSSM implements Plugin {
   private log: (message: string) => null
   private config?: ServerlessOfflineSSMConfig
@@ -31,10 +35,13 @@ class ServerlessOfflineSSM implements Plugin {
 
   constructor(
     private serverless: ServerlessOffline,
-    private options: Serverless.Options
+    private options: PluginOptions
   ) {
     this.log = serverless.cli.log.bind(serverless.cli)
     this.config = serverless.service.custom?.['serverless-offline-ssm'] ?? {}
+    if (!!options.ssmOfflineStages) {
+      this.config.stages = options.ssmOfflineStages.split(',')
+    }
     this.provider = 'aws'
 
     // check for valid configuration
