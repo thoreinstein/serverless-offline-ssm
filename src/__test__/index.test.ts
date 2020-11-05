@@ -74,6 +74,23 @@ describe('serverless-offline-ssm', () => {
     expect(serverless.variables.variableResolvers[0].resolver).not.toEqual(instance.resolver)
   })
 
+  test('should initialize with ssmOfflineStages passed to the CLI', () => {
+    const serverless = serverlessMock({
+      service: {
+        custom: {
+          'serverless-offline-ssm': {
+            stages: null,
+          },
+        },
+      },
+    })
+    const options = serverlessOptionsMock({ ssmOfflineStages: stage })
+    const instance = new ServerlessOfflineSSM(serverless, options)
+
+    // check the resolver has been overridden
+    expect(serverless.variables.variableResolvers[0].resolver).toEqual(instance.resolver)
+  })
+
   test('throws an exception with an invalid serverless version', () => {
     expect(() => new ServerlessOfflineSSM(
       serverlessMock({ version: '0.99'}),

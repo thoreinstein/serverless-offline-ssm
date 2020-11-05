@@ -50,6 +50,10 @@ or provider sections of your `serverless.yaml` are includes within the
 `stages` property of the plugin configuration. If this condition has not been
 met the plugin has no effect.
 
+The `stages` property of the plugin configuration can be overridden with a
+cli parameter `--ssmOfflineStages` which takes a comma separated list of
+stages.
+
 ### .env
 
 Your `.env` file needs to contain only variable names without the `ssm:` prefix and `~(true|false|split)` sulfix.
