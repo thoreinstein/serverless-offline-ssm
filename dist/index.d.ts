@@ -11,6 +11,9 @@ declare type ServerlessOffline = Serverless & {
         variableResolvers: Resolver[];
     };
 };
+declare type PluginOptions = Serverless.Options & {
+    ssmOfflineStages?: string;
+};
 declare class ServerlessOfflineSSM implements Plugin {
     private serverless;
     private options;
@@ -20,7 +23,7 @@ declare class ServerlessOfflineSSM implements Plugin {
     private ssmResolver;
     hooks: Plugin.Hooks;
     commands?: Plugin.Commands;
-    constructor(serverless: ServerlessOffline, options: Serverless.Options);
+    constructor(serverless: ServerlessOffline, options: PluginOptions);
     resolver: (name: string) => Promise<string | void>;
     shouldExecute: () => boolean;
     /**

@@ -43,6 +43,9 @@ class ServerlessOfflineSSM {
         };
         this.log = serverless.cli.log.bind(serverless.cli);
         this.config = (_b = (_a = serverless.service.custom) === null || _a === void 0 ? void 0 : _a['serverless-offline-ssm']) !== null && _b !== void 0 ? _b : {};
+        if (!!options.ssmOfflineStages) {
+            this.config.stages = options.ssmOfflineStages.split(',');
+        }
         this.provider = 'aws';
         // check for valid configuration
         this.valid();
