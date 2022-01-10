@@ -50,7 +50,18 @@ or provider sections of your `serverless.yaml` are includes within the
 `stages` property of the plugin configuration. If this condition has not been
 met the plugin has no effect.
 
-The `stages` property of the plugin configuration can be overridden with a
+You can configure the plugin's `stages` by defining them in your `serverless.yml` like so
+```
+custom:
+  serverless-offline-ssm:
+    # List all the stages for when this plugin should be ran
+    stages:
+        - debug
+        - offline
+        - local
+```
+
+The `stages` property of the plugin configuration can also be overridden with a
 cli parameter `--ssmOfflineStages` which takes a comma separated list of
 stages.
 
