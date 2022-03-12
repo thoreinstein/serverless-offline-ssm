@@ -21,10 +21,6 @@ describe('Resolver', () => {
 
   const serverless = serverlessMock()
   const options = serverlessOptionsMock()
-  const getSSMResolverInstance = (serverless: ServerlessOffline) => {
-    return serverless.variables.variableResolvers
-    .find(({ serviceName }) => serviceName === 'SSM')
-  }
 
   describe('v3', () => {
     test.each(['3.00', '4.69', '5.99'])
@@ -40,16 +36,120 @@ describe('Resolver', () => {
       resolver.apply(major)
       expect(spy).toBeCalledTimes(1)
     })
-    test.todo('should call getProvider with aws')
-    test.todo('should call setProvider with new resolver applied')
-    test.todo('if aws.request is called with service SSM, it should call with original aws.request')
-    test.todo('if aws.request is called with method getParameter, it should call with original aws.request')
-    test.todo('resolves with an undefined value with an invalid key')
-    test.todo('resolves with the value defined within the serverless config')
-    test.todo('resolves with the value defined within the .env file')
-    test.todo('resolves values from the serverless config in preference to the .env file')
+    test('should call getProvider with aws', () => {
+      const serverless = serverlessMock()
+      const spy = jest.spyOn(serverless, 'getProvider')
+
+      const options = serverlessOptionsMock()
+      const resolver = new ResolverHandler(serverless, options, customOptions)
+
+      resolver.applyV3()
+
+      expect(spy).toBeCalledWith('aws')
+    })
+    test('should set aws.request with V3', () => {
+      const serverless = serverlessMock()
+      const spyGetProvider = jest.spyOn(serverless, 'getProvider')
+      const provider = { request: jest.fn() } as any
+      spyGetProvider.mockImplementationOnce(() => provider)
+
+      const options = serverlessOptionsMock()
+      const resolver = new ResolverHandler(serverless, options, customOptions)
+      const spyResolverV3 = jest.spyOn(resolver, 'V3')
+
+      const middleware = resolver.V3(jest.fn())
+
+      spyResolverV3.mockImplementationOnce(() => middleware)
+
+      resolver.applyV3()
+      expect(provider.request).toBe(middleware)
+    })
+    test('should call setProvider with provider', () => {
+      const serverless = serverlessMock()
+
+      const provider = { request: jest.fn() } as any
+
+      const spyGetProvider = jest.spyOn(serverless, 'getProvider')
+      const spySetProvider = jest.spyOn(serverless, 'setProvider')
+      spyGetProvider.mockImplementationOnce(() => provider)
+
+      const options = serverlessOptionsMock()
+      const resolver = new ResolverHandler(serverless, options, customOptions)
+
+      resolver.applyV3()
+
+      expect(spySetProvider).toBeCalledWith('aws', provider)
+    })
+    test('should call Amazon SSM if service is different then SSM', async () => {
+      const resolver = new ResolverHandler(serverless, options, customOptions)
+      const request = jest.fn()
+
+      const v3 = resolver.V3(request)
+      await v3('__SERVICE__', '__METHOD__', { Name: '__NAME__' }, options)
+
+      expect(request).toHaveBeenCalled()
+    })
+
+    test('should call Amazon SSM if method is different then getParameter', async () => {
+      const resolver = new ResolverHandler(serverless, options, customOptions)
+      const request = jest.fn()
+
+      const v3 = resolver.V3(request)
+      await v3('SSM', '__METHOD__', { Name: '__NAME__' }, options)
+
+      expect(request).toHaveBeenCalled()
+    })
+
+    test('should not call Amazon if service is SSM or method is different then getParameter', async () => {
+      const resolver = new ResolverHandler(serverless, options, customOptions)
+      const request = jest.fn()
+
+      const v3 = resolver.V3(request)
+      await v3('SSM', 'getParameter', { Name: '__NAME__' }, options)
+
+      expect(request).not.toHaveBeenCalled()
+    })
+
+    test('should call getValue with variable', async () => {
+      const resolver = new ResolverHandler(serverless, options, customOptions)
+      const request = jest.fn()
+      const spy = jest.spyOn(resolver, 'getValue')
+
+      const v3 = resolver.V3(request)
+
+      const Name = '__NAME__'
+
+      await v3('SSM', 'getParameter', { Name }, options)
+
+      expect(spy).toHaveBeenCalledWith(Name)
+    })
+    test('should return on amazon fake response', async () => {
+      const resolver = new ResolverHandler(serverless, options, customOptions)
+      const request = jest.fn()
+      const params = { Name: '__NAME__' }
+      const value = '__VALUE__'
+
+      const spyGetValue = jest.spyOn(resolver, 'getValue')
+      spyGetValue.mockImplementationOnce(async () => value)
+
+      const v3 = resolver.V3(request)
+      const response = await v3('SSM', 'getParameter', params, options)
+
+      expect(response).toStrictEqual({
+        Parameter: {
+          Value: value, 
+          Type: 'String',
+          ...params,
+        }
+      })
+    })
   })
  
+  const getSSMResolverInstance = (serverless: ServerlessOffline) => {
+    return serverless.variables.variableResolvers
+    .find(({ serviceName }) => serviceName === 'SSM')
+  }
+
   describe('v2', () => {
     test.each(['2.00', '1.69', '1.99'])
       ('should call applyV2 if major version is %s', (version) => {

@@ -34,6 +34,10 @@ export default class ResolverHandler {
     private customOptions: CustomOptions,
   ) {}
 
+  public async getValue(key: string) {
+    return this.customOptions.ssm?.[key] || await getValueFromEnv(key)
+  }
+
   public apply(major: number) {
     
     // can be improved
@@ -48,19 +52,21 @@ export default class ResolverHandler {
     const aws = this.serverless.getProvider('aws')
       
     if (aws) {
-      aws.request = this.V3(aws.request)
+      const ssmRequest = aws.request.bind(aws);
+      aws.request = this.V3(ssmRequest)
       this.serverless.setProvider('aws', aws)
     }
   }
 
-  public V3(originalRequest: AWSRequest): AWSRequest {
+  public V3(ssmRequest: AWSRequest): AWSRequest {
     return async (service: string, method: string, params: AWSParams) => {
 
       if (service !== 'SSM' || method !== 'getParameter') {
-        return originalRequest(service, method, params, this.options);
+        return ssmRequest(service, method, params, this.options);
       }
-  
-      const Value = this.customOptions.ssm?.[params.Name] || await getValueFromEnv(params.Name)
+
+      const name = params.Name
+      const Value = await this.getValue(name)
       
       return { Parameter: { Value, Type: 'String', ...params } };
     }
@@ -81,7 +87,7 @@ export default class ResolverHandler {
 
       if (!key) return
   
-      const Value = this.customOptions.ssm?.[key] || await getValueFromEnv(key)
+      const Value = await this.getValue(key)
 
       if (key.startsWith('/aws/reference/secretsmanager')) {
         try {
