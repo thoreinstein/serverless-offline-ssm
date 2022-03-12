@@ -1,9 +1,9 @@
 import { readFile, existsSync } from 'fs'
 
-export const getValueFromEnv = (key: string): Promise<string> =>
-  new Promise((resolve, reject) => {
+export const getValueFromEnv = (key: string): Promise<string | null> => {
+  return new Promise((resolve, reject) => {
     if (!existsSync('.env')) {
-      resolve()
+      resolve(null)
       return
     }
 
@@ -32,3 +32,13 @@ export const getValueFromEnv = (key: string): Promise<string> =>
       }
     )
   })
+}
+
+
+export const getMajorAndMinorVersion = (version: string): [number, number] => {
+
+  const [major, minor] = version.split('.').map(Number)
+
+  return [major, minor]
+
+}

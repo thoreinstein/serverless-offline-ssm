@@ -83,7 +83,7 @@ describe('util', () => {
 
       expect(readFile).not.toHaveBeenCalled()
 
-      return expect(resolved).resolves.toEqual(undefined)
+      return expect(resolved).resolves.toEqual(null)
     })
 
     it('rejects when failing to read the .env file', async () => {
