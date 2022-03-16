@@ -1,66 +1,52 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const resolver_1 = __importDefault(require("./resolver"));
 const util_1 = require("./util");
 class ServerlessOfflineSSM {
     constructor(serverless, options) {
-        var _a, _b;
         this.serverless = serverless;
         this.options = options;
-        this.resolver = (name) => {
-            var _a;
-            const [, , key] = name.match(this.ssmResolver.regex) || [];
-            if (!key) {
-                // Yields "A valid SSM parameter ... could not be found."
-                return Promise.resolve();
-            }
-            const value = (_a = this.config.ssm) === null || _a === void 0 ? void 0 : _a[key];
-            const promisifiedValue = value
-                ? Promise.resolve(value)
-                : util_1.getValueFromEnv(key);
-            if (key.startsWith('/aws/reference/secretsmanager')) {
-                return promisifiedValue.then(JSON.parse).catch(() => promisifiedValue);
-            }
-            return promisifiedValue;
-        };
-        this.shouldExecute = () => {
-            var _a, _b;
-            return (_b = this.config.stages.includes(this.options.stage || ((_a = this.serverless.service.provider) === null || _a === void 0 ? void 0 : _a.stage))) !== null && _b !== void 0 ? _b : false;
-        };
         /**
          * This plugin is only compatible with serverless 1.69+
          */
-        this.compatible = () => {
+        this.checkCompatible = () => {
             const { version } = this.serverless;
             this.log(`serverless-offline-ssm checking serverless version ${version}.`);
-            const [major, minor] = version.split('.').map(Number);
+            const [major, minor] = util_1.getMajorAndMinorVersion(version);
             if (major < 1 || (major === 1 && minor < 69)) {
                 throw new Error('serverless-offline-ssm plugin only works with Serverless 1.69 upwards.');
             }
         };
-        this.valid = () => {
-            if (!this.config.stages) {
+        this.setCustomConfig = () => {
+            var _a, _b;
+            const config = (_b = (_a = this.serverless.service.custom) === null || _a === void 0 ? void 0 : _a['serverless-offline-ssm']) !== null && _b !== void 0 ? _b : {};
+            if (!!this.options.ssmOfflineStages) {
+                config.stages = this.options.ssmOfflineStages.split(',');
+            }
+            if (!config.stages) {
                 throw new Error('serverless-offline-ssm missing configuration stages.');
             }
+            this.customOptions = config;
         };
         this.log = serverless.cli.log.bind(serverless.cli);
-        this.config = (_b = (_a = serverless.service.custom) === null || _a === void 0 ? void 0 : _a['serverless-offline-ssm']) !== null && _b !== void 0 ? _b : {};
-        if (!!options.ssmOfflineStages) {
-            this.config.stages = options.ssmOfflineStages.split(',');
-        }
-        this.provider = 'aws';
-        // check for valid configuration
-        this.valid();
-        // check whether this plugin should be executed
+        this.setCustomConfig();
+        this.checkCompatible();
         if (this.shouldExecute()) {
-            // check for compatibility
-            this.compatible();
-            this.ssmResolver = serverless.variables.variableResolvers
-                .find(({ serviceName }) => serviceName === 'SSM');
-            // override the resolver
-            if (this.ssmResolver) {
-                this.ssmResolver.resolver = this.resolver;
-            }
+            this.applyResolver();
         }
     }
+    applyResolver() {
+        const [major, _] = util_1.getMajorAndMinorVersion(this.serverless.version);
+        const resolver = new resolver_1.default(this.serverless, this.options, this.customOptions);
+        resolver.apply(major);
+    }
+    shouldExecute() {
+        var _a, _b;
+        return (_b = this.customOptions.stages.includes(this.options.stage || ((_a = this.serverless.service.provider) === null || _a === void 0 ? void 0 : _a.stage))) !== null && _b !== void 0 ? _b : false;
+    }
 }
-module.exports = ServerlessOfflineSSM;
+exports.default = ServerlessOfflineSSM;
 //# sourceMappingURL=index.js.map
