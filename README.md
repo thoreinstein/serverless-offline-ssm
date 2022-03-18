@@ -4,7 +4,7 @@ This [Serverless](https://github.com/serverless/serverless) plugin allows you to
 
 ## NOTE!!
 
-Version `5.X` only works `Serverless 1.69+`, if you'd like to use this
+Version `6.x` only works with `Serverless 3+`. Version `5.X` only works `Serverless 1.69+`, if you'd like to use this
 plugin with `Serverless <= 1.59` use version `4.1.2`
 
 ## Documentation

@@ -1,35 +1,32 @@
 import Serverless from 'serverless';
 import Plugin from 'serverless/classes/Plugin';
-declare type Resolver = {
-    regex: RegExp;
-    resolver: (name: string) => Promise<string | void>;
-    isDisabledAtPrepopulation?: boolean;
-    serviceName?: string;
+import { Resolver } from './resolver';
+export declare type CustomOptions = {
+    stages: string[];
+    ssm?: Record<string, string>;
 };
-declare type ServerlessOffline = Serverless & {
+export declare type ServerlessOffline = Serverless & {
     variables: {
         variableResolvers: Resolver[];
     };
 };
-declare type PluginOptions = Serverless.Options & {
+export declare type ServerlessOptions = Serverless.Options & {
     ssmOfflineStages?: string;
 };
 declare class ServerlessOfflineSSM implements Plugin {
-    private serverless;
-    private options;
+    serverless: ServerlessOffline;
+    options: ServerlessOptions;
     private log;
-    private config?;
-    private provider;
-    private ssmResolver;
+    private customOptions;
     hooks: Plugin.Hooks;
     commands?: Plugin.Commands;
-    constructor(serverless: ServerlessOffline, options: PluginOptions);
-    resolver: (name: string) => Promise<string | void>;
-    shouldExecute: () => boolean;
+    constructor(serverless: ServerlessOffline, options: ServerlessOptions);
+    applyResolver(): void;
+    shouldExecute(): boolean;
     /**
      * This plugin is only compatible with serverless 1.69+
      */
-    private compatible;
-    private valid;
+    private checkCompatible;
+    private setCustomConfig;
 }
-export = ServerlessOfflineSSM;
+export default ServerlessOfflineSSM;

@@ -1,6 +1,6 @@
 {
   "name": "serverless-offline-ssm",
-  "version": "5.2.0",
+  "version": "6.1.0",
   "engines": {
     "node": ">=6.0"
   },
@@ -28,10 +28,10 @@
     "build": "tsc"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.9",
+    "@types/jest": "^27.4.1",
     "@types/lodash.merge": "^4.6.6",
-    "@types/node": "^14.0.27",
-    "@types/serverless": "^1.67.0",
+    "@types/node": "^17.0.21",
+    "@types/serverless": "^3.0.1",
     "jest": "^25.5.4",
     "lodash.merge": "^4.6.2",
     "ts-jest": "^25.4.0",
