@@ -1,4 +1,4 @@
-import { CustomOptions, ServerlessOffline } from ".."
+import { CustomOptions, ServerlessOffline } from "../types"
 import ResolverHandler from "../resolver"
 import { serverlessMock, serverlessOptionsMock } from './mocks/serverless'
 import * as util from '../util'
