@@ -1,23 +1,8 @@
-import Serverless from 'serverless'
 import Plugin from 'serverless/classes/Plugin'
-import ResolverHandler, { Resolver } from './resolver'
+import ResolverHandler from './resolver'
+import { CustomOptions, ServerlessOffline, ServerlessOptions } from './types'
 import { getMajorAndMinorVersion } from './util'
 
-
-export type CustomOptions = {
-  stages: string[]
-  ssm?: Record<string, string>
-}
-
-export type ServerlessOffline = Serverless & {
-  variables: {
-    variableResolvers: Resolver[]
-  }
-}
-
-export type ServerlessOptions = Serverless.Options & {
-  ssmOfflineStages?: string
-}
 
 class ServerlessOfflineSSM implements Plugin {
   private log: (message: string) => null
@@ -94,4 +79,4 @@ class ServerlessOfflineSSM implements Plugin {
   }
 }
 
-export default ServerlessOfflineSSM
+export = ServerlessOfflineSSM

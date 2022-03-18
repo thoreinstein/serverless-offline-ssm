@@ -3,7 +3,7 @@ import {
   ServerlessOptions, 
   ServerlessOffline,
   CustomOptions, 
-} from './index'
+} from './types'
 
 type AWSParams = { Name: string, WithDecryption?: boolean }
 
