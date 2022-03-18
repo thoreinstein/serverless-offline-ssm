@@ -1,5 +1,5 @@
 import merge from 'lodash.merge'
-import { ServerlessOffline } from '../..'
+import { ServerlessOffline } from '../../types'
 
 const stage = '__STAGE__'
 
