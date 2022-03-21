@@ -1,4 +1,4 @@
-import { ServerlessOptions, ServerlessOffline, CustomOptions } from './index';
+import { ServerlessOptions, ServerlessOffline, CustomOptions } from './types';
 declare type AWSParams = {
     Name: string;
     WithDecryption?: boolean;
