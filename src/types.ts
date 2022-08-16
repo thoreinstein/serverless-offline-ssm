@@ -4,6 +4,7 @@ import { Resolver } from './resolver'
 
 export type CustomOptions = {
   stages: string[]
+  envPath?: string;
   ssm?: Record<string, string>
 }
 
