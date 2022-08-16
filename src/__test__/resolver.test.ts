@@ -7,6 +7,7 @@ const stage = '__STAGE__'
 const yaml = '__YAML_VALUE__'
 const both = '__BOTH_YAML_VALUE__'
 const env = '__ENV_VALUE__'
+const envPath = '.env.example'
 
 const customOptions = {
   stages: [stage],
@@ -14,6 +15,7 @@ const customOptions = {
     yaml,
     both,
   },
+  envPath,
 } as CustomOptions
 
 
@@ -185,7 +187,7 @@ describe('Resolver', () => {
 
       await expect(v2('ssm:env')).resolves.toEqual(env)
 
-      expect(spyGetValueFromEnv).toHaveBeenCalledWith('env')
+      expect(spyGetValueFromEnv).toHaveBeenCalledWith('env', envPath)
     })
 
     test('resolves values from the serverless config in preference to the .env file', async () => {
