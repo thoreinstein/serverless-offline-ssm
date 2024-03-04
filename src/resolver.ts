@@ -27,15 +27,18 @@ type AWSRequest = (
 ) => Promise<unknown>
 
 export default class ResolverHandler {
-
+  private ssmKeyPrefixRegExp: RegExp;
   constructor(
     private serverless: ServerlessOffline,
     private options: ServerlessOptions,
     private customOptions: CustomOptions,
-  ) {}
+  ) {
+    this.ssmKeyPrefixRegExp = new RegExp(`^${this.customOptions.ssmPrefix ?? ''}`);
+  }
 
-  public async getValue(key: string) {
-    return this.customOptions.ssm?.[key] || await getValueFromEnv(key)
+  public async getValue(ssmKey: string) {
+    const key = ssmKey.replace(this.ssmKeyPrefixRegExp, '');
+    return this.customOptions.ssm?.[key] || (await getValueFromEnv(key))
   }
 
   public apply(major: number) {

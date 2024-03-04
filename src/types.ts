@@ -5,6 +5,7 @@ import { Resolver } from './resolver'
 export type CustomOptions = {
   stages: string[]
   ssm?: Record<string, string>
+  ssmPrefix?: string
 }
 
 export type ServerlessOffline = Serverless & {

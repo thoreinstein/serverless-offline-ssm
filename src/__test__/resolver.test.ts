@@ -110,10 +110,10 @@ describe('Resolver', () => {
       expect(request).not.toHaveBeenCalled()
     })
 
-    test('should call getValue with variable', async () => {
+    test('should call spyGetValueFromEnv with variable', async () => {
       const resolver = new ResolverHandler(serverless, options, customOptions)
       const request = jest.fn()
-      const spy = jest.spyOn(resolver, 'getValue')
+      const spy = jest.spyOn(util, 'getValueFromEnv')
 
       const v3 = resolver.V3(request)
 
@@ -123,6 +123,28 @@ describe('Resolver', () => {
 
       expect(spy).toHaveBeenCalledWith(Name)
     })
+
+    test('should call spyGetValueFromEnv with the ssmPrefix removed', async () => {
+      const customOptionsWithSsmPrefix = {
+        ...customOptions,
+        ssmPrefix: '/some/long/ssm/prefix/',
+      }
+      const resolver = new ResolverHandler(serverless, options, customOptionsWithSsmPrefix)
+      const request = jest.fn()
+      const params = { Name: '/some/long/ssm/prefix/__NAME__' }
+      const value = '__VALUE__'
+
+      const spyGetValueFromEnv = jest.spyOn(util, 'getValueFromEnv')
+      spyGetValueFromEnv.mockImplementationOnce(async () => value)
+
+      const v3 = resolver.V3(request)
+      await v3('SSM', 'getParameter', params, options)
+
+      expect(spyGetValueFromEnv).toHaveBeenCalledWith(
+        '__NAME__',
+      )
+    })
+
     test('should return on amazon fake response', async () => {
       const resolver = new ResolverHandler(serverless, options, customOptions)
       const request = jest.fn()
@@ -147,7 +169,7 @@ describe('Resolver', () => {
  
   const getSSMResolverInstance = (serverless: ServerlessOffline) => {
     return serverless.variables.variableResolvers
-    .find(({ serviceName }) => serviceName === 'SSM')
+    .find(({ serviceName }) => serviceName === 'SSM')!
   }
 
   describe('v2', () => {
@@ -176,6 +198,17 @@ describe('Resolver', () => {
       await expect(v2('ssm:yaml')).resolves.toEqual(yaml)
     })
 
+    test('resolves with the value defined within the serverless config with ssmPrefix removed', async () => {
+      const customOptionsWithSsmPrefix = {
+        ...customOptions,
+        ssmPrefix: '/some/long/ssm/prefix/',
+      }
+      const resolver = new ResolverHandler(serverless, options, customOptionsWithSsmPrefix)
+      const v2 = resolver.V2(getSSMResolverInstance(serverless))
+
+      await expect(v2('ssm:/some/long/ssm/prefix/yaml')).resolves.toEqual(yaml)
+    })
+
     test('resolves with the value defined within the .env file', async () => {
       const spyGetValueFromEnv = jest.spyOn(util, 'getValueFromEnv')
       spyGetValueFromEnv.mockImplementationOnce(async () => env)
@@ -188,15 +221,22 @@ describe('Resolver', () => {
       expect(spyGetValueFromEnv).toHaveBeenCalledWith('env')
     })
 
-    test('resolves values from the serverless config in preference to the .env file', async () => {
+    test('resolves with the value defined within the .env file with ssmPrefix removed', async () => {
       const spyGetValueFromEnv = jest.spyOn(util, 'getValueFromEnv')
-      spyGetValueFromEnv.mockImplementationOnce(async () => both)
+      spyGetValueFromEnv.mockImplementationOnce(async () => env)
 
-      const resolver = new ResolverHandler(serverless, options, customOptions)
+      const customOptionsWithSsmPrefix = {
+        ...customOptions,
+        ssmPrefix: '/some/long/ssm/prefix/',
+      }
+      const resolver = new ResolverHandler(serverless, options, customOptionsWithSsmPrefix)
       const v2 = resolver.V2(getSSMResolverInstance(serverless))
 
-      await expect(v2('ssm:both')).resolves.toEqual(both)
-      expect(spyGetValueFromEnv).not.toHaveBeenCalled()
+      await expect(v2('ssm:/some/long/ssm/prefix/env')).resolves.toEqual(env)
+
+      expect(spyGetValueFromEnv).toHaveBeenCalledWith(
+        'env',
+      )
     })
 
     describe('resolver with AWS Secrets Manager key', () => {
