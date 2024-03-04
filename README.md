@@ -78,6 +78,42 @@ custom:
       'another.sample.value': '99 red baloons'
 ```
 
+### ssmPrefix
+
+To help keep `.env` files simple you can apply the constant `ssmPrefix` within `serverless-offline-ssm` in `serverless.yml`
+to be removed from the start of the SSM variable name when fetching from `.env` or the `ssm` serverless config.
+
+For example if you have the following SSM params defined in `serverless.yml`:
+
+- `${ssm:/application-name/stage/PARAMETER_NAME1}`
+- `${ssm:/application-name/stage/PARAMETER_NAME2}`
+
+Setting the `ssmPrefix` option in the configuration:
+
+```yaml
+custom:
+  serverless-offline-ssm:
+    ssmPrefix: /application-name/stage/
+```
+
+Will simplyfy the `.env` file to:
+
+```
+PARAMETER_NAME1="offline-value1"
+PARAMETER_NAME2="offline-value2"
+```
+
+It also applies to ssm params defined in the config:
+
+```yaml
+custom:
+  serverless-offline-ssm:
+    ssmPrefix: /application-name/stage/
+    ssm:
+      PARAMETER_NAME1: 'sample-value-1'
+      PARAMETER_NAME2: 'sample-value-2'
+```
+
 ## Contributing
 
 Pull requests are always welcome. Please see the [contributing](https://github.com/janders223/serverless-offline-ssm/blob/master/CONTRIBUTING.md) guidelines.
